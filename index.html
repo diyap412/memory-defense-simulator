@@ -2,25 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Void Blaster</title>
+  <title>Void Blaster FPS</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>VOID BLASTER</h1>
-<p>Move: A/D or ◀ ▶ | Shoot: Space | Pause: P</p>
+<div id="hud">
+  <span>Score: <span id="score">0</span></span>
+  <span>Health: <span id="health">100</span></span>
+</div>
 
 <div id="game">
-  <div id="player"></div>
-  <div id="pauseOverlay">PAUSED</div>
+  <div id="crosshair">+</div>
 </div>
 
-<div class="hud">
-  <span>Score: <span id="score">0</span></span>
-  <span>Lives: <span id="lives">3</span></span>
-  <span>Wave: <span id="wave">1</span></span>
-</div>
-
+<p class="hint">Move: WASD | Shoot: Click</p>
 <button onclick="startGame()">Start / Restart</button>
 
 <script src="script.js"></script>
