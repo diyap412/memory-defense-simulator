@@ -1,1 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Memory Defense Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<h1>Memory Defense Simulator</h1>
+<p>Survive by accessing memory correctly.</p>
+
+<div class="controls">
+  <button id="btnUser">Write User RAM</button>
+  <button id="btnKernel">Write Kernel RAM</button>
+  <button id="btnProtected">Write Protected RAM</button>
+</div>
+
+<div class="controls">
+  <button id="btnKernelMode">Enter Kernel Mode</button>
+  <button id="btnReset">System Reset</button>
+</div>
+
+<h3>Memory Map</h3>
+<div id="memoryGrid"></div>
+
+<pre id="status"></pre>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
