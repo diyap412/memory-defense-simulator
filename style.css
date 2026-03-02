@@ -1,1 +1,51 @@
+body {
+  font-family: monospace;
+  background: #020617;
+  color: #e5e7eb;
+  padding: 20px;
+}
 
+h1 {
+  color: #7dd3fc;
+}
+
+.controls {
+  margin-bottom: 10px;
+}
+
+button {
+  margin-right: 8px;
+  padding: 6px 10px;
+  background: #1e293b;
+  color: white;
+  border: 1px solid #334155;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #334155;
+}
+
+pre {
+  background: #020617;
+  padding: 12px;
+  border: 1px solid #1e293b;
+  margin-top: 15px;
+}
+
+#memoryGrid {
+  display: grid;
+  grid-template-columns: repeat(32, 10px);
+  gap: 2px;
+  margin-bottom: 15px;
+}
+
+.cell {
+  width: 10px;
+  height: 10px;
+}
+
+.user { background: #22c55e; }
+.kernel { background: #eab308; }
+.protected { background: #ef4444; }
+.active { outline: 2px solid white; }
