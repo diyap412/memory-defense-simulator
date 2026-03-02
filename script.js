@@ -1,185 +1,119 @@
 const game = document.getElementById("game");
-const player = document.getElementById("player");
 const scoreEl = document.getElementById("score");
-const livesEl = document.getElementById("lives");
-const waveEl = document.getElementById("wave");
-const pauseOverlay = document.getElementById("pauseOverlay");
+const healthEl = document.getElementById("health");
 
-let playerX, score, lives, wave;
-let bullets = [], enemies = [], powerups = [];
-let gameLoop, enemySpawner;
-let paused = false;
-let fireCooldown = 300;
-let canShoot = true;
+let score = 0;
+let health = 100;
+let enemies = [];
+let bullets = [];
+let keys = {};
+let loop, spawner;
 
-const keys = {};
-document.addEventListener("keydown", e => {
-  keys[e.key] = true;
-  if (e.key === "p") togglePause();
-});
-document.addEventListener("keyup", e => keys[e.key] = false);
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+game.addEventListener("click", shoot);
 
 function startGame() {
-  clearInterval(gameLoop);
-  clearInterval(enemySpawner);
-  game.innerHTML = "";
-  game.appendChild(player);
-  game.appendChild(pauseOverlay);
+  clearInterval(loop);
+  clearInterval(spawner);
+  game.innerHTML = `<div id="crosshair">+</div>`;
 
-  playerX = 230;
   score = 0;
-  lives = 3;
-  wave = 1;
-  bullets = [];
+  health = 100;
   enemies = [];
-  powerups = [];
-  paused = false;
+  bullets = [];
 
   updateHUD();
 
-  gameLoop = setInterval(loop, 20);
-  enemySpawner = setInterval(spawnEnemy, 900);
-}
-
-function loop() {
-  if (paused) return;
-  movePlayer();
-  moveBullets();
-  moveEnemies();
-  movePowerups();
-  checkWave();
-}
-
-function movePlayer() {
-  if ((keys["a"] || keys["ArrowLeft"]) && playerX > 0) playerX -= 6;
-  if ((keys["d"] || keys["ArrowRight"]) && playerX < 460) playerX += 6;
-  if (keys[" "] && canShoot) shoot();
-  player.style.left = playerX + "px";
-}
-
-function shoot() {
-  canShoot = false;
-  setTimeout(() => canShoot = true, fireCooldown);
-
-  const b = document.createElement("div");
-  b.className = "bullet";
-  b.style.left = playerX + 17 + "px";
-  b.style.bottom = "60px";
-  game.appendChild(b);
-  bullets.push(b);
+  loop = setInterval(update, 16);
+  spawner = setInterval(spawnEnemy, 900);
 }
 
 function spawnEnemy() {
   const e = document.createElement("div");
   e.className = "enemy";
-
-  const roll = Math.random();
-  e.hp = 1;
-  e.speed = 2;
-
-  if (roll > 0.8) { e.classList.add("tank"); e.hp = 3; e.speed = 1; }
-  else if (roll > 0.6) { e.classList.add("fast"); e.speed = 4; }
-
-  e.style.left = Math.floor(Math.random() * 10) * 50 + "px";
-  e.style.top = "0px";
+  e.x = Math.random() * (window.innerWidth - 60);
+  e.y = -60;
+  e.speed = 1 + Math.random() * 2;
+  e.style.left = e.x + "px";
+  e.style.top = e.y + "px";
   game.appendChild(e);
   enemies.push(e);
 }
 
+function shoot(e) {
+  const b = document.createElement("div");
+  b.className = "bullet";
+  b.x = e.clientX;
+  b.y = window.innerHeight * 0.7;
+  b.speed = 12;
+  b.style.left = b.x + "px";
+  b.style.top = b.y + "px";
+  game.appendChild(b);
+  bullets.push(b);
+}
+
+function update() {
+  moveBullets();
+  moveEnemies();
+}
+
 function moveBullets() {
-  bullets.forEach((b, bi) => {
-    b.style.bottom = b.offsetBottom + 10 + "px";
-    if (b.offsetBottom > 600) {
+  bullets.forEach((b, i) => {
+    b.y -= b.speed;
+    b.style.top = b.y + "px";
+
+    if (b.y < -20) {
       game.removeChild(b);
-      bullets.splice(bi, 1);
+      bullets.splice(i, 1);
     }
   });
 }
 
 function moveEnemies() {
   enemies.forEach((e, ei) => {
-    e.style.top = e.offsetTop + e.speed + "px";
+    e.y += e.speed;
+    e.style.top = e.y + "px";
 
     bullets.forEach((b, bi) => {
-      if (hit(b, e)) {
-        e.hp--;
+      if (collide(b, e)) {
+        game.removeChild(e);
         game.removeChild(b);
+        enemies.splice(ei, 1);
         bullets.splice(bi, 1);
-        if (e.hp <= 0) destroyEnemy(e, ei);
+        score += 10;
+        updateHUD();
       }
     });
 
-    if (e.offsetTop > 560) {
+    if (e.y > window.innerHeight * 0.75) {
       game.removeChild(e);
       enemies.splice(ei, 1);
-      lives--;
+      health -= 10;
       updateHUD();
-      if (lives <= 0) endGame();
+      if (health <= 0) endGame();
     }
   });
 }
 
-function destroyEnemy(e, index) {
-  game.removeChild(e);
-  enemies.splice(index, 1);
-  score += 10;
-  if (Math.random() < 0.2) spawnPowerup(e.offsetLeft);
-  updateHUD();
-}
-
-function spawnPowerup(x) {
-  const p = document.createElement("div");
-  p.className = "powerup";
-  p.style.left = x + "px";
-  p.style.top = "0px";
-  p.type = Math.random() > 0.5 ? "rapid" : "life";
-  game.appendChild(p);
-  powerups.push(p);
-}
-
-function movePowerups() {
-  powerups.forEach((p, pi) => {
-    p.style.top = p.offsetTop + 3 + "px";
-    if (hit(p, player)) {
-      if (p.type === "rapid") fireCooldown = 120;
-      if (p.type === "life") lives++;
-      game.removeChild(p);
-      powerups.splice(pi, 1);
-      updateHUD();
-    }
-  });
-}
-
-function checkWave() {
-  if (score >= wave * 150) {
-    wave++;
-    fireCooldown = Math.max(100, fireCooldown - 20);
-    updateHUD();
-  }
-}
-
-function togglePause() {
-  paused = !paused;
-  pauseOverlay.style.display = paused ? "flex" : "none";
-}
-
-function hit(a, b) {
+function collide(a, b) {
+  const ar = a.getBoundingClientRect();
+  const br = b.getBoundingClientRect();
   return !(
-    a.offsetTop + a.offsetHeight < b.offsetTop ||
-    a.offsetTop > b.offsetTop + b.offsetHeight ||
-    a.offsetLeft + a.offsetWidth < b.offsetLeft ||
-    a.offsetLeft > b.offsetLeft + b.offsetWidth
+    ar.bottom < br.top ||
+    ar.top > br.bottom ||
+    ar.right < br.left ||
+    ar.left > br.right
   );
 }
 
 function updateHUD() {
   scoreEl.textContent = score;
-  livesEl.textContent = lives;
-  waveEl.textContent = wave;
+  healthEl.textContent = health;
 }
 
 function endGame() {
-  clearInterval(gameLoop);
-  clearInterval(enemySpawner);
+  clearInterval(loop);
+  clearInterval(spawner);
   alert("Game Over! Score: " + score);
 }
