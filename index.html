@@ -2,30 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Memory Defense Simulator</title>
+  <title>Void Blaster</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>Memory Defense Simulator</h1>
-<p>Survive by accessing memory correctly.</p>
+<h1>VOID BLASTER</h1>
+<p>Move: A/D or ◀ ▶ | Shoot: Space | Pause: P</p>
 
-<div class="controls">
-  <button id="btnUser">Write User RAM</button>
-  <button id="btnKernel">Write Kernel RAM</button>
-  <button id="btnProtected">Write Protected RAM</button>
+<div id="game">
+  <div id="player"></div>
+  <div id="pauseOverlay">PAUSED</div>
 </div>
 
-<div class="controls">
-  <button id="btnKernelMode">Enter Kernel Mode</button>
-  <button id="btnReset">System Reset</button>
+<div class="hud">
+  <span>Score: <span id="score">0</span></span>
+  <span>Lives: <span id="lives">3</span></span>
+  <span>Wave: <span id="wave">1</span></span>
 </div>
 
-<h3>Memory Map</h3>
-<div id="memoryGrid"></div>
+<button onclick="startGame()">Start / Restart</button>
 
-<pre id="status"></pre>
-
-<script type="module" src="main.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
